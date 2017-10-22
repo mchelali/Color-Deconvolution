@@ -18,7 +18,7 @@ class Point:
         return self.__cy
 
     def getVector(self):
-        return [self.__cx, self.__cy]
+        return np.array([self.__cx, self.__cy])
 
 class HSD:
     def __init__(self, img =None):
@@ -46,22 +46,28 @@ class HSD:
                 self.gray[i, j] = sum(self.img_0[i, j])
 
     def calcule_HSI(self):
-        [l, c] = self.img_0.shape
-        self.img_hsi = np.zeros([l,c])
-        for i in range(l):
-            for j in range(c):
-                x = (self.img_0[i, j, 0]/self.gray[i, j]) - 1
-                y = (self.img_0[i, j, 1]-self.img_0[i, j, 2]) / self.gray[i, j] * np.sqrt(3)
-                self.img_hsi[i, j] = Point(x, y)
+        if self.img_gray == None:
+            print("have to calculate global intensity first")
+        else:
+            [l, c] = self.img_0.shape
+            self.img_hsi = np.zeros([l,c])
+            for i in range(l):
+                for j in range(c):
+                    x = (self.img_0[i, j, 0]/self.gray[i, j]) - 1
+                    y = (self.img_0[i, j, 1]-self.img_0[i, j, 2]) / self.gray[i, j] * np.sqrt(3)
+                    self.img_hsi[i, j] = Point(x, y)
 
     def calcule_HSD(self):
-        [l, c] = self.img_gray.shape
-        self.img_hsd = np.zeros([l,c])
-        for i in range(l):
-            for j in range(c):
-                x = (self.od[i, j, 0]/self.od_global[i, j]) - 1
-                y = (self.od[i, j, 1]-self.od[i, j, 2]) / self.od_global[i, j] * np.sqrt(3)
-                self.img_hsd[i, j] = Point(x, y)
+        if self.od_global == None:
+            print("Have to calculate global OD first")
+        else:
+            [l, c] = self.img_gray.shape
+            self.img_hsd = np.zeros([l,c])
+            for i in range(l):
+                for j in range(c):
+                    x = (self.od[i, j, 0]/self.od_global[i, j]) - 1
+                    y = (self.od[i, j, 1]-self.od[i, j, 2]) / self.od_global[i, j] * np.sqrt(3)
+                    self.img_hsd[i, j] = Point(x, y)
 
     def getSaturation(self, point):
         n = 0
