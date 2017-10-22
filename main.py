@@ -1,6 +1,7 @@
 
 import matplotlib.pyplot as plt
-from scripts import ColorDeconvolution
+from scripts.ColorDeconvolution import ColorDeconvolution
+from scripts.hsd import HSD
 
 
 if __name__=="__main__":
@@ -11,6 +12,17 @@ if __name__=="__main__":
     img = plt.imread(path)
     img = img[:, :, 0:3]
 
+    """
+    # deconvolution de couleur
     satin = ColorDeconvolution(img)
     satin.separateStain()
     satin.showStains()
+    """
+
+    #hsd
+
+    h = HSD(img)
+    h.RGB_2_OD()
+    h.OD_GLOBAL()
+    h.calcule_HSD()
+    h.plotHSD()
