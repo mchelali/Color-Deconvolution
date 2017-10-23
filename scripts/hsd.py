@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 class Point:
     def __init__(self, x=0, y=0):
@@ -18,15 +19,15 @@ class Point:
         return self.__cy
 
     def getVector(self):
-        return [self.__cx, self.__cy]
+        return np.array([self.__cx, self.__cy])
 
 class HSD:
-    def __init__(self, img =None):
+    def __init__(self, img):
         self.img_0 = img
         self.od = None
-        self.img_gray = None
+        self.img_gray = None # for HSI
         self.od_global = None
-        self.img_hsi = None
+        self.img_hsi = None #for HSI
         self.img_hsd = None
 
     def RGB_2_OD(self):
@@ -43,11 +44,18 @@ class HSD:
         self.gray = np.zeros([l, c])
         for i in range(l):
             for j in range(c):
-                self.gray[i, j] = sum(self.img_0[i, j])
+                self.gray[i, j] = sum(self.img_0[i, j])/3
+
+    def OD_GLOBAL(self):
+        [l, c, d] = self.od.shape
+        self.od_global = np.zeros([l, c])
+        for i in range(l):
+            for j in range(c):
+                self.od_global[i, j] = sum(self.od[i, j])/3
 
     def calcule_HSI(self):
         [l, c] = self.img_0.shape
-        self.img_hsi = np.zeros([l,c])
+        self.img_hsi = np.zeros([l,c], type(Point))
         for i in range(l):
             for j in range(c):
                 x = (self.img_0[i, j, 0]/self.gray[i, j]) - 1
@@ -55,8 +63,8 @@ class HSD:
                 self.img_hsi[i, j] = Point(x, y)
 
     def calcule_HSD(self):
-        [l, c] = self.img_gray.shape
-        self.img_hsd = np.zeros([l,c])
+        [l, c, d] = self.od.shape
+        self.img_hsd = np.zeros([l, c], type(Point))
         for i in range(l):
             for j in range(c):
                 x = (self.od[i, j, 0]/self.od_global[i, j]) - 1
@@ -71,3 +79,19 @@ class HSD:
 
     def getHue(self, point):
         return np.arctan(point.getY()/point.getX())
+
+    def getCxVector_HSD(self):
+        cx = list()
+        for a in self.img_hsd.ravel():
+            cx.append(a.getX())
+        return cx
+
+    def getCyVector_HSD(self):
+        cy = list()
+        for a in self.img_hsd.ravel():
+            cy.append(a.getY())
+        return cy
+
+    def plotHSD(self):
+        plt.plot(self.getCxVector_HSD(), self.getCyVector_HSD(), 'rx')
+        plt.show()
