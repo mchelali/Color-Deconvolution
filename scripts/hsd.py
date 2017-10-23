@@ -25,7 +25,7 @@ class HSD:
     def __init__(self, img):
         self.img_0 = img
         self.od = None
-        self.img_gray = None # for HSI
+        self.img_gray = None #for HSI
         self.od_global = None
         self.img_hsi = None #for HSI
         self.img_hsd = None
