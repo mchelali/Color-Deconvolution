@@ -95,3 +95,18 @@ class HSD:
     def plotHSD(self):
         plt.plot(self.getCxVector_HSD(), self.getCyVector_HSD(), 'rx')
         plt.show()
+
+if __name__ == "__main__":
+    # reading the image
+    # path="Tumor_CD31_LoRes.png"
+    path = "../figure9.jpg"
+    img = plt.imread(path)
+    img = img[:, :, 0:3]
+
+    # hsd
+
+    h = HSD(img)
+    h.RGB_2_OD()
+    h.OD_GLOBAL()
+    h.calcule_HSD()
+    h.plotHSD()

@@ -3,55 +3,71 @@ import numpy as np
 import os
 
 class PCA:
-    def __init__(self, path=""):
+    def __init__(self, img):
         # constructeur de la class
-        self.path_DB = path #chemin ver la DataSet
-        self.__cellsNumber = None # nombre de cellules
-        self.__cells = None #Matrice de cellules
-        self.__callShape = None #taille of the images in the DataSet
+        self.img_0 = img
+        self.od = None
 
-    def startPCA(self):
-        self.__readDataSet__()
-        self.__avreageCell__()
+    def getOD(self):
+        return self.od
 
-    #-------------- Getter and Setters ------------------------------------
+    def RGB_2_OD(self):
+        [l, c, d] = self.img_0.shape
+        self.od = np.zeros([l, c, d])
+        for i in range(l):
+            for j in range(c):
+                for k in range(d):
+                    if self.img_0[i, j, k] != 0:
+                        self.od[i, j, k] = np.log(self.img_0[i, j, k])
 
-    def setPath(self, path=""):
-        if path == "":
-            print("Please give a path to your DataSet")
-        else:
-            self.path_DB = path
+    def getComponents(self, image_2d, numStain=100):
+        cov_mat = image_2d - np.average(image_2d)
+        eig_val, eig_vec = np.linalg.eigh(np.cov(cov_mat))  # USING "eigh", SO THAT PROPRTIES OF HERMITIAN MATRIX CAN BE USED
+        p = len(eig_vec)
+        print p
+        print (eig_vec.shape)
+        idx = np.argsort(eig_val)
+        idx = idx[::-1]
+        eig_vec = eig_vec[:, idx]
+        eig_val = eig_val[idx]
+        if numStain < p or numStain > 0:
+            eig_vec = eig_vec[:, range(numStain)]
+        score = np.dot(eig_vec.T, cov_mat)
+        recon = np.dot(eig_vec, score) + np.average(image_2d)  # SOME NORMALIZATION CAN BE USED TO MAKE IMAGE QUALITY BETTER
+        #recon_img_mat = np.uint8(np.absolute(recon))  # TO CONTROL COMPLEX EIGENVALUES -----> to recontract rusulted image after reduce color
 
-    def getPath(self):
-        return self.path_DB
+        return recon
 
-    def getCellNumber(self):
-        return self.__cellsNumber
+    def startPCA(self, numStain=100):
+        self.RGB_2_OD()
+        r = self.od[:, :, 0]
+        g = self.od[:, :, 1]
+        b = self.od[:, :, 2]
+        comp_r = self.getComponents(r, numStain)
+        comp_g = self.getComponents(g, numStain)
+        comp_b = self.getComponents(b, numStain)
+        return np.dstack((comp_r, comp_g, comp_b))
 
-    #----------------------------------------------------------------------
 
-    def __readDataSet__(self):
-        if self.path_DB == "":
-            print("give a path to the DataSet first")
-        else:
-            r = []
-            g = []
-            b = []
-            for dirname, dirnames, filenames in os.walk(self.path_DB):
-                for subdirname in dirnames:
-                    subject_path = os.path.join(dirname, subdirname)
-                    for filename in os.listdir(subject_path):
-                        if (filename.endswith('tiff')) :
-                            # print os.path.join(subject_path, filename)
-                            im = plt.imread(os.path.join(subject_path, filename))
-                            r.append(im[:, :, 0].ravel())
-                            g.append(im[:, :, 1].ravel())
-                            b.append(im[:, :, 2].ravel())
-            self.__cellsNumber = len(r)
-            self.__cells = np.array([r, g, b]).transpose()
+if __name__=="__main__":
+    img = plt.imread("../figure9.jpg")
 
-    def __avreageCell__(self):
-        # calculer la cellule maoyenne de tous les cellules
-        self.avreageCell = np.zeros([len(self.__cells[0, :]), 3])# init d'un vecteur 0
-        for i in range(self.__cells.shape[0]):
-            self.avreageCell[i] = np.round((sum(self.__cells[i, :]) / self.__cellsNumber), 3)
+    pca = PCA(img)
+    resul = pca.startPCA(50)
+    od = pca.getOD()
+
+    plt.subplot(2, 4, 2)
+    plt.imshow(img)
+
+    plt.subplot(2, 4, 3)
+    plt.imshow(od)
+
+    plt.subplot(2, 3, 4)
+    plt.imshow(resul[:,:,0], cmap="gray")
+
+    plt.subplot(2, 3, 5)
+    plt.imshow(resul[:, :, 1], cmap="gray")
+
+    plt.subplot(2, 3, 6)
+    plt.imshow(resul[:, :, 2], cmap="gray")
+    plt.show()
