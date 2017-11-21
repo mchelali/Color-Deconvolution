@@ -1,112 +1,86 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
-class Point:
-    def __init__(self, x=0, y=0):
-        self.__cx = x
-        self.__cy = y
-
-    def setX(self, x):
-        self.__cx=x
-
-    def setY(self, y):
-        self.__cy=y
-
-    def getX(self):
-        return self.__cx
-
-    def getY(self):
-        return self.__cy
-
-    def getVector(self):
-        return np.array([self.__cx, self.__cy])
+import OpticalDensity as od
 
 class HSD:
     def __init__(self, img):
         self.img_0 = img
-        self.od = None
-        self.img_gray = None #for HSI
-        self.od_global = None
-        self.img_hsi = None #for HSI
-        self.img_hsd = None
-
-    def RGB_2_OD(self):
-        [l, c, d] = self.img_0.shape
-        self.od = np.zeros([l, c, d])
-        for i in range(l):
-            for j in range(c):
-                for k in range(d):
-                    if self.img_0[i, j, k] != 0:
-                        self.od[i, j, k] = np.log(self.img_0[i, j, k])
+        self.img_hsi = None
 
     def RGB_2_GRAY(self):
-        [l, c] = self.img_0.shape
-        self.gray = np.zeros([l, c])
+        [l, c, d] = self.img_0.shape
+        gray = np.zeros([l, c])
         for i in range(l):
             for j in range(c):
-                self.gray[i, j] = sum(self.img_0[i, j])/3
-
-    def OD_GLOBAL(self):
-        [l, c, d] = self.od.shape
-        self.od_global = np.zeros([l, c])
-        for i in range(l):
-            for j in range(c):
-                self.od_global[i, j] = sum(self.od[i, j])/3
+                gray[i, j] = sum(self.img_0[i, j])/3
+        return gray
 
     def calcule_HSI(self):
-        [l, c] = self.img_0.shape
-        self.img_hsi = np.zeros([l,c], type(Point))
+        [l, c, d] = self.img_0.shape
+        gray = self.RGB_2_GRAY()
+        self.img_hsi = np.zeros([l, c, 3])
+        self.img_hsi[:, :, 2] = gray
         for i in range(l):
             for j in range(c):
                 x = (self.img_0[i, j, 0]/self.gray[i, j]) - 1
-                y = (self.img_0[i, j, 1]-self.img_0[i, j, 2]) / self.gray[i, j] * np.sqrt(3)
-                self.img_hsi[i, j] = Point(x, y)
+                y = (self.img_0[i, j, 1]-self.img_0[i, j, 2]) / (self.gray[i, j] * np.sqrt(3))
+                self.img_hsi[i, j, 0] = self.getHue2(x, y)
+                self.img_hsi[i, j, 1] = self.getSaturation2(x, y)
 
-    def calcule_HSD(self):
-        [l, c, d] = self.od.shape
-        self.img_hsd = np.zeros([l, c], type(Point))
-        for i in range(l):
-            for j in range(c):
-                x = (self.od[i, j, 0]/self.od_global[i, j]) - 1
-                y = (self.od[i, j, 1]-self.od[i, j, 2]) / self.od_global[i, j] * np.sqrt(3)
-                self.img_hsd[i, j] = Point(x, y)
+    def getSaturation2(self, cx, cy):
+        return np.sqrt(np.square(cx)+np.square(cy))
 
-    def getSaturation(self, point):
-        n = 0
-        for i in point.getVector():
-            n = n + np.square(i)
-        return np.sqrt(n)
-
-    def getHue(self, point):
-        return np.arctan(point.getY()/point.getX())
-
-    def getCxVector_HSD(self):
-        cx = list()
-        for a in self.img_hsd.ravel():
-            cx.append(a.getX())
-        return cx
-
-    def getCyVector_HSD(self):
-        cy = list()
-        for a in self.img_hsd.ravel():
-            cy.append(a.getY())
-        return cy
+    def getHue2(self, cx, cy):
+        return np.arctan(cy/cx)
 
     def plotHSD(self):
-        plt.plot(self.getCxVector_HSD(), self.getCyVector_HSD(), 'rx')
-        plt.show()
+        coord = self.getCoordinate()
+        hue = []
+        saturation = []
+        for i in coord:
+            hue.append(self.getHue2(i[0], i[1]))
+            saturation.append(self.getSaturation2(i[0], i[1]))
+
+        """
+        from sklearn.neighbors import KNeighborsClassifier
+
+        colors = ['#4EACC5', '#FF9C34', '#4E9A06']
+        from sklearn.cluster import KMeans
+        from sklearn.metrics.pairwise import pairwise_distances_argmin
+        k_means = KMeans(n_clusters=3)
+        k_means.fit(points)
+        k_means_cluster_centers = np.sort(k_means.cluster_centers_, axis=0)
+        k_means_labels = pairwise_distances_argmin(points, k_means_cluster_centers)
+
+        for k, col in zip(range(3), colors):
+            my_members = k_means_labels == k
+            cluster_center = k_means_cluster_centers[k]
+            plt.plot(points[my_members, 0], points[my_members, 1], 'w', markerfacecolor=col, marker='.')
+            #plt.plot(cluster_center[0], cluster_center[1], 'o', markerfacecolor=col, markeredgecolor='k', markersize=6)
+        plt.title('KMeans')
+
+        plt.show()"""
 
 if __name__ == "__main__":
     # reading the image
     # path="Tumor_CD31_LoRes.png"
-    path = "../figure9.jpg"
+    path = "../DataSet/BreastCancerCell_dataset/ytma10_010704_benign1_ccd.tif"
     img = plt.imread(path)
-    img = img[:, :, 0:3]
+    img = img[:, :, 0:3].astype(np.double)
+
+    # hsi
+    h = HSD(img)
+    h.RGB_2_GRAY()
+    h.calcule_HSI()
+    h.plotHSD()
+
+    #calculer la OD
+    OD = od.rgb_2_od(img)
 
     # hsd
+    h1 = HSD(OD)
+    h1.RGB_2_GRAY()
+    h1.calcule_HSI()
+    h1.plotHSD()
 
-    h = HSD(img)
-    h.RGB_2_OD()
-    h.OD_GLOBAL()
-    h.calcule_HSD()
-    h.plotHSD()
+

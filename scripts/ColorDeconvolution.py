@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class ColorDeconvolution:
-    def __init__(self, img=None):
+    def __init__(self, img):
         self.img_0 = img
         self.stains = None
         self.od = None
@@ -19,7 +19,7 @@ class ColorDeconvolution:
         for i in range(l):
             for j in range(c):
                 for k in range(d):
-                    if img[i,j,k] != 0 :
+                    if self.img_0[i,j,k] != 0 :
                         self.od[i,j,k] = np.log(self.img_0[i, j, k])
 
 
@@ -47,11 +47,11 @@ class ColorDeconvolution:
         RGBtoHDAB = np.linalg.inv(HDABtoRGB)
 
 
-        [l,c,d] = img.shape
+        [l,c,d] = self.img_0.shape
         self.stains = np.zeros([l, c, d])
         for i in range(l):
             for j in range(c):
-                a = np.dot(img[i, j], RGBtoHDAB)
+                a = np.dot(self.od[i, j], RGBtoHDAB)
                 self.stains[i, j, 0] = a[0]
                 self.stains[i, j, 1] = a[1]
                 self.stains[i, j, 2] = a[2]
@@ -76,3 +76,17 @@ class ColorDeconvolution:
 
         plt.show()
 
+if __name__=="__main__":
+
+    # reading the image
+    #path="Tumor_CD31_LoRes.png"
+    path="../figure9.jpg"
+    img = plt.imread(path)
+    img = img[:, :, 0:3]
+
+
+    # deconvolution de couleur
+    satin = ColorDeconvolution(img)
+    satin.RGB_2_OD()
+    satin.separateStain()
+    satin.showStains()
