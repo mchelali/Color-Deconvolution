@@ -52,9 +52,9 @@ if __name__=="__main__":
     pca_R = PCA_(od[:, :, 0])
     pca_G = PCA_(od[:, :, 1])
     pca_B = PCA_(od[:, :, 2])
-    rest_R = pca_R.startPCA(100)
-    rest_G = pca_G.startPCA(100)
-    rest_B = pca_B.startPCA(100)
+    rest_R = pca_R.startPCA(3)
+    rest_G = pca_G.startPCA(3)
+    rest_B = pca_B.startPCA(3)
 
     #print("taille resultat", rest_R.shape)
     #print("matrice de covariance", pca_R.cov_mat)
