@@ -21,7 +21,7 @@ class ColorDeconvolution:
                 for k in range(d):
                     if self.img_0[i,j,k] != 0 :
                         self.od[i,j,k] = np.log(self.img_0[i, j, k])
-
+        return self.od
 
     def norm(self, vector):
         n = 0
@@ -45,13 +45,14 @@ class ColorDeconvolution:
         # combine stain vectors to deconvolution matrix
         HDABtoRGB = np.array([He / self.norm(He), Eo / self.norm(Eo), DAB / self.norm(DAB)])
         RGBtoHDAB = np.linalg.inv(HDABtoRGB)
-
+        print RGBtoHDAB
 
         [l,c,d] = self.img_0.shape
         self.stains = np.zeros([l, c, d])
         for i in range(l):
             for j in range(c):
                 a = np.dot(self.od[i, j], RGBtoHDAB)
+                b=self.od[i,j]
                 self.stains[i, j, 0] = a[0]
                 self.stains[i, j, 1] = a[1]
                 self.stains[i, j, 2] = a[2]

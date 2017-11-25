@@ -144,6 +144,7 @@ class HSD:
         Z=np.reshape(kmeans.labels_,self.chroma.shape[0]*self.chroma.shape[1],2)
         Z=np.reshape(Z[:100],(10,10))
         return Z
+
     def recontructionToRGB(self):
         #Calcul de intensity global de chaque pixel on en a besoin pour la reconstruction
         self.GlobalIntensity()
