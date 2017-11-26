@@ -73,7 +73,7 @@ class Traitement_img(QtGui.QWidget):
         self.canvas.figure.clf()
         self.filename = str(QtGui.QFileDialog.getOpenFileName(None, 'Open file')[0])
         self.img = plt.imread(self.filename)
-        #self.img = self.img[:, :, 0:3].astype(np.double)
+        self.img = self.img[:, :, 0:3].astype(np.double)
 
         #self.filename=filename
         print self.filename
