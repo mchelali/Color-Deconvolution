@@ -12,9 +12,10 @@ if __name__=="__main__":
     img = plt.imread(path)
     img = img[:, :, 0:3]
 
-    """
+
     # deconvolution de couleur
     satin = ColorDeconvolution(img)
+    satin.RGB_2_OD()
     satin.separateStain()
     satin.showStains()
     """
@@ -26,3 +27,4 @@ if __name__=="__main__":
     h.OD_GLOBAL()
     h.calcule_HSD()
     h.plotHSD()
+    """
