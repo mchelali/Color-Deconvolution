@@ -9,6 +9,9 @@ class ColorDeconvolution:
         self.stains = None
         self.od = None
 
+    def getStains(self):
+        return self.stains
+
     def setImage(self, img):
         if img != None:
             self.img_0 = img
