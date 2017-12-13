@@ -45,7 +45,7 @@ class ColorDeconvolution:
         # combine stain vectors to deconvolution matrix
         HDABtoRGB = np.array([He / self.norm(He), Eo / self.norm(Eo), DAB / self.norm(DAB)])
         RGBtoHDAB = np.linalg.inv(HDABtoRGB)
-        print RGBtoHDAB
+
 
         [l,c,d] = self.img_0.shape
         self.stains = np.zeros([l, c, d])

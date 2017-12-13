@@ -124,11 +124,11 @@ class HSD:
                 vec3.append(vec[i])
         print len(vec1)
 
-        c1 = plt.scatter(vec1[1:][0], vec1[1:][1], c='r', marker='+')
+        c1 = plt.scatter(vec1[1:,0], vec1[1:,1], c='r', marker='+')
 
-        c2 = plt.scatter(vec2[1:][0], vec2[1:][1], c='g', marker='o')
+        c2 = plt.scatter(vec2[1:,0], vec2[1:,1], c='g', marker='o')
 
-        c3 = plt.scatter(vec3[1:][0], vec3[1:][1], c='b', marker='*')
+        c3 = plt.scatter(vec3[1:,0], vec3[1:,1], c='b', marker='*')
         plt.legend([c1, c2, c3], ['Cluster 0', 'Cluster 1', 'Cluster 2'])
         plt.title('K-means clusters into 3 clusters')
         plt.show()
@@ -145,6 +145,14 @@ class HSD:
         Z=np.reshape(Z[:100],(10,10))
         return Z
 
+    def Kmeans2(self,cluster):
+        np.random.seed(42)
+        vec=np.reshape(self.chroma, (self.chroma.shape[0]*self.chroma.shape[1],2))
+        kmeans = KMeans(n_clusters=cluster, random_state=0)
+        kmeans.fit(vec)
+        plt.scatter(vec[:1000, 0], vec[:1000, 1], c=kmeans.labels_[:1000])
+        plt.show()
+
     def recontructionToRGB(self):
         #Calcul de intensity global de chaque pixel on en a besoin pour la reconstruction
         self.GlobalIntensity()
@@ -158,8 +166,16 @@ class HSD:
                 self.imgReconstruite[i, j, 0] = self.intensity[i, j] * (cx + 1)
                 self.imgReconstruite[i, j, 1] = 0.5 * self.intensity[i, j] * (2 - cx - np.sqrt(3) * cy)
                 self.imgReconstruite[i, j, 2] = 0.5 * self.intensity[i, j] * (2 - cx - np.sqrt(3) * cy)
+        plt.subplot(1,3,1)
+        plt.title("hue")
+        plt.imshow(self.imgReconstruite[:, :, 0], cmap="magma")
+        plt.subplot(1,3,2)
+        plt.title("saturation")
+        plt.imshow(self.imgReconstruite[:, :, 1], cmap="RdPu")
+        plt.subplot(1,3,3)
+        plt.title("intensity or density")
+        plt.imshow(self.imgReconstruite[:, :, 2], cmap="gray")
 
-        plt.imshow(self.imgReconstruite[:, :, :])
         plt.show()
 
 
@@ -175,8 +191,8 @@ if __name__ == "__main__":
     h = HSD(img)
     h.chromaticite()
     h.calcule_HSI()
-    Z=h.Kmeans(3)
-    h.plotHS(Z)
+    h.Kmeans2(3)
+    #h.plotHS(Z)
     h.recontructionToRGB()
 
     #calculer la OD
