@@ -1,4 +1,8 @@
 # Color-Deconvolution
+
+* * Language de programmation : Python 2.7
+* * Libs : numpy, matplotlib, sikit-learn, PySide
+
 Color Deconvolution for quantification of histological staining
 
 * Color deconvolution
