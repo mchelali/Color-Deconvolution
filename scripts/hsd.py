@@ -3,9 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import OpticalDensity as od
 from sklearn.cluster import KMeans
+from matplotlib import cm
+import cv2
+from PIL import Image
 
 class HSD:
-    def __init__(self, img):
+    def __init__(self, img,path,type):
         """
         :param img: image en entrer pour changer d'espace de couleur
             chroma : matrice de chromaticité. de dimension
@@ -24,6 +27,10 @@ class HSD:
         self.chroma = None
         self.imgReconstruite=None
         self.intensity=None
+        self.path=path
+        self.path2="C:\Users\ismet\Desktop\Final\Color-Deconvolution\Resultat"
+        self.type=type
+        self.imageBinariser=None
 
     def getRed(self):
         return self.img_0[:,:,0]
@@ -72,14 +79,14 @@ class HSD:
         return np.sqrt(np.square(cx)+np.square(cy))
 
     def getHue2(self, cx, cy):
-        return np.arctan(cy/cx)
+        return 0 if cx==0 else np.arctan(cy/cx)
 
     def getCX(self,hue,saturation):
         return saturation*np.cos(hue)
 
     def getCY(self,hue,saturation):
         return saturation*np.sin(hue)
-
+    # plotHSD permet de afficher les images de chaque canal de la hsd en gray
     def plotHSD(self):
         plt.subplot(1,3,1)
         plt.imshow(self.img_hsi[:,:,0], cmap="gray")
@@ -90,7 +97,7 @@ class HSD:
         plt.subplot(1, 3, 3)
         plt.imshow(self.img_hsi[:, :, 2], cmap="gray")
         plt.show()
-
+    # Afficher le plot manuellement selon les valeurs de chroma
     def plotHS(self,Z):
         for i in range(Z.shape[0]):
             for j in range(Z.shape[1]):
@@ -153,6 +160,36 @@ class HSD:
         plt.scatter(vec[:1000, 0], vec[:1000, 1], c=kmeans.labels_[:1000])
         plt.show()
 
+    def binarisation(self):
+
+        # Otsu's thresholding after Gaussian filtering
+        # il faut lui donner image self.imgReconstruite et binariser chaque canal hue saturation et density
+
+
+        blur1 = cv2.GaussianBlur((self.imgReconstruite[:, :, 0]*255).astype(np.uint8), (5, 5), 0)
+        ret1, th1 = cv2.threshold(blur1, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+
+        blur2 = cv2.GaussianBlur((self.imgReconstruite[:, :, 1]*255).astype(np.uint8), (5, 5), 0)
+        ret2, th2 = cv2.threshold(blur2, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        blur3 = cv2.GaussianBlur((self.imgReconstruite[:, :, 2]*255).astype(np.uint8), (5, 5), 0)
+        ret3, th3 = cv2.threshold(blur3, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        plt.subplot(1,3,1)
+        plt.imshow(th1,cmap="gray")
+        plt.subplot(1, 3, 2)
+        plt.imshow(th2,cmap="gray")
+        plt.subplot(1, 3, 3)
+        plt.imshow(th3,cmap="gray")
+
+
+        plt.show()
+        self.saveOpencv(th1,"Hue_Binariser.png")
+        self.saveOpencv(th2, "Saturation_Binariser.png")
+        self.saveOpencv(th3, "Intensity_Binariser.png")
+        return th3
+
     def recontructionToRGB(self):
         #Calcul de intensity global de chaque pixel on en a besoin pour la reconstruction
         self.GlobalIntensity()
@@ -166,42 +203,60 @@ class HSD:
                 self.imgReconstruite[i, j, 0] = self.intensity[i, j] * (cx + 1)
                 self.imgReconstruite[i, j, 1] = 0.5 * self.intensity[i, j] * (2 - cx - np.sqrt(3) * cy)
                 self.imgReconstruite[i, j, 2] = 0.5 * self.intensity[i, j] * (2 - cx - np.sqrt(3) * cy)
-        plt.subplot(1,3,1)
+
+        plt.subplot(2,3,1)
         plt.title("hue")
-        plt.imshow(self.imgReconstruite[:, :, 0], cmap="magma")
-        plt.subplot(1,3,2)
+        plt.imshow(self.imgReconstruite[:, :, 0], cmap=cm.hsv)
+
+        self.saveOpencv((self.imgReconstruite[:, :, 0]*255).astype(np.uint8), "HSI_Teinte.png")
+        plt.colorbar(ticks=[0, 60, 120, 179], orientation='horizontal', cmap=cm.hsv)
+
+        plt.subplot(2,3,2)
         plt.title("saturation")
-        plt.imshow(self.imgReconstruite[:, :, 1], cmap="RdPu")
-        plt.subplot(1,3,3)
-        plt.title("intensity or density")
+        plt.imshow(self.imgReconstruite[:, :, 1], cmap="gray")
+
+        # save HSI
+        self.saveOpencv((self.imgReconstruite[:, :, 1]*255).astype(np.uint8), "HSI_Saturation.png")
+
+        plt.subplot(2,3,3)
+        plt.title(self.type)
         plt.imshow(self.imgReconstruite[:, :, 2], cmap="gray")
 
+        # save HSD
+        #self.savePillow((self.imgReconstruite[:,:,2]*255).astype(np.uint8), self.path+"HSD_Density.tif")
+        self.saveOpencv((self.imgReconstruite[:,:,2]*255).astype(np.uint8), "HSI_Density.png")
+
+
+        #img = Image.fromarray(self.img_0[:, :, 0])
+        #img.save(self.path + "img.tif")
+
         plt.show()
+
+    def saveOpencv(self,img,path):
+        cv2.imwrite(self.path2+"/"+self.path[19:]+"/"+path, img)
+
+    def savePillow(self,img,path):
+        img_to_save = Image.fromarray(img)
+        img_to_save.save(self.path2+"/"+self.path[19:]+"/"+path)
 
 
 
 if __name__ == "__main__":
     # reading the image
     # path="Tumor_CD31_LoRes.png"
-    path = "../DataSet/BreastCancerCell_dataset/ytma10_010704_benign1_ccd.tif"
+    #path = "../DataSet/BreastCancerCell_dataset/ytma10_010704_benign1_ccd.tif"
+
+    path = "../DataSet_Lomenie/tumor.png"
     img = plt.imread(path)
     img = img[:, :, 0:3].astype(np.double)
+    od=od.rgb_2_od2(img)
 
     # hsi
-    h = HSD(img)
+    h = HSD(od, path, "intensity")
     h.chromaticite()
     h.calcule_HSI()
-    h.Kmeans2(3)
-    #h.plotHS(Z)
+    # h.Kmeans2(3)
+    # h.plotHS(Z)
     h.recontructionToRGB()
-
-    #calculer la OD
-    OD = od.rgb_2_od(img)
-
-    # hsd
-    #h1 = HSD(OD)
-    #h1.chromaticite()
-    #h1.calcule_HSI()
-    #h1.plotHSD()
-
+    h.binarisation()
 

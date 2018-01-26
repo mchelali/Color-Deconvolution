@@ -75,8 +75,8 @@ class PC:
                 self.reduction[i, 2] = 0
 
 
-        self.S = np.reshape(self.S, (self.l, self.c, 3))
-        self.reduction = np.reshape(self.reduction, (self.l, self.c, 3))
+        self.S = np.reshape(self.S, ((self.l, self.c, 3)))
+        self.reduction = np.reshape(self.reduction, ((self.l, self.c, 3)))
         print self.S.shape
         print self.S
         print self.reduction
@@ -101,4 +101,4 @@ if __name__ == '__main__':
     p.pca()
     p.matriceReduite()
 
-    #pca.fastICA()
+    p.fastICA()
