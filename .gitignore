@@ -1,2 +1,9 @@
 .idea
 scripts/pca.pyc
+scripts/ColorDeconvolution.pyc
+scripts/hsd.pyc
+gui/ICAWindows.pyc
+scripts/pca.pyc
+.idea
+.idea/Color-Deconvolution.iml
+DataSet/images
