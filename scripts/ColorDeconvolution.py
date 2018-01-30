@@ -117,16 +117,19 @@ class ColorDeconvolution:
         ret3, th3 = cv2.threshold(blur3, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
         plt.subplot(1, 3, 1)
-        plt.imshow(th1)
+        plt.title("Hematoxyline")
+        plt.imshow(th1,cmap="gray")
         plt.subplot(1, 3, 2)
-        plt.imshow(th2)
+        plt.title("Eosine")
+        plt.imshow(th2,cmap="gray")
         plt.subplot(1, 3, 3)
-        plt.imshow(th3)
+        plt.title("DAB")
+        plt.imshow(th3,cmap="gray")
 
         plt.show()
-        self.saveOpencv(th1, "Hue_Binariser.png")
-        self.saveOpencv(th2, "Saturation_Binariser.png")
-        self.saveOpencv(th3, "Intensity_Binariser.png")
+        self.saveOpencv(th1, "Hematoxyline.png")
+        self.saveOpencv(th2, "Eosine.png")
+        self.saveOpencv(th3, "DAB.png")
         return th3
 
     def saveOpencv(self,img, path):
@@ -134,7 +137,7 @@ class ColorDeconvolution:
 
 if __name__=="__main__":
 
-    path="../DataSet_Lomenie/tumor.png"
+    path="../DataSet_Lomenie/arn2.tif"
     img = plt.imread(path)
     img = img[:, :, 0:3]
 

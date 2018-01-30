@@ -149,6 +149,7 @@ class Traitement_img(QtGui.QWidget):
         h.calcule_HSI()
         h.recontructionToRGB()
         h.binarisation()
+
     def normeL1(self):
 
         path1 = self.filename[:49] + "Resultat/" + self.filename[65:] + "/HSD/HSI_Density.tif"
