@@ -61,8 +61,9 @@ class HSD:
         self.chroma = np.zeros([l, c, 2])
         for i in range(l):
             for j in range(c):
-                self.chroma[i, j ,0] = (self.img_0[i, j, 0] / gray[i, j]) - 1
-                self.chroma[i, j, 1] = (self.img_0[i, j, 1] - self.img_0[i, j, 2]) / (gray[i, j] * np.sqrt(3))
+
+                self.chroma[i, j ,0] = (self.img_0[i, j, 0] / gray[i, j]) - 1 if (gray[i, j] - 1) != 0 else 0
+                self.chroma[i, j, 1] = (self.img_0[i, j, 1] - self.img_0[i, j, 2]) / (gray[i, j] * np.sqrt(3)) if (gray[i, j] * np.sqrt(3)) !=0 else 0
 
 
     def calcule_HSI(self):
@@ -177,10 +178,13 @@ class HSD:
         ret3, th3 = cv2.threshold(blur3, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
         plt.subplot(1,3,1)
+        plt.title("hue")
         plt.imshow(th1,cmap="gray")
         plt.subplot(1, 3, 2)
+        plt.title("Saturation")
         plt.imshow(th2,cmap="gray")
         plt.subplot(1, 3, 3)
+        plt.title(self.type)
         plt.imshow(th3,cmap="gray")
 
 
@@ -206,10 +210,10 @@ class HSD:
 
         plt.subplot(2,3,1)
         plt.title("hue")
-        plt.imshow(self.imgReconstruite[:, :, 0], cmap=cm.hsv)
+        plt.imshow(self.imgReconstruite[:, :, 0], cmap="gray")
 
         self.saveOpencv((self.imgReconstruite[:, :, 0]*255).astype(np.uint8), "HSI_Teinte.png")
-        plt.colorbar(ticks=[0, 60, 120, 179], orientation='horizontal', cmap=cm.hsv)
+        #plt.colorbar(ticks=[0, 60, 120, 179], orientation='horizontal', cmap=cm.hsv)
 
         plt.subplot(2,3,2)
         plt.title("saturation")
@@ -252,7 +256,7 @@ if __name__ == "__main__":
     od=od.rgb_2_od2(img)
 
     # hsi
-    h = HSD(od, path, "intensity")
+    h = HSD(od, path, "Density")
     h.chromaticite()
     h.calcule_HSI()
     # h.Kmeans2(3)

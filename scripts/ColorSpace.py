@@ -205,21 +205,28 @@ class ColorSpace:
             img[i, 0] = r1
             img[i, 1] = g1
             img[i, 2] = b1
+
         img = np.reshape(img,(self.l, self.c, 3))
         self.img_norm = np.reshape(self.img_norm,(self.l, self.c, 3))
 
+        img1=np.zeros((self.l,self.c,3))
+        img1[:, :, 0] = img[:, :, 0]
+        img1[:, :, 1] = img[:, :, 1]
+        img1[:, :, 2] = img[:, :, 2]
 
         img=self.normalise2(img)
         print "-----------SUCCESS norme L1---------------"
-        plt.subplot(1, 3, 1)
-        plt.imshow(cv2.equalizeHist(img[:, :, 0].astype(np.uint8)), cmap="gray")
-        plt.subplot(1, 3, 2)
-        plt.imshow(cv2.equalizeHist(img[:, :, 1].astype(np.uint8)), cmap="gray")
-        plt.subplot(1, 3, 3)
-        plt.imshow(cv2.equalizeHist(img[:, :, 2].astype(np.uint8)), cmap="gray")
-        plt.title("Test")
+        plt.subplot(1, 4, 1)
+        plt.title("")
+        plt.imshow((img[:, :, 0].astype(np.uint8)), cmap="gray")
+        plt.subplot(1, 4, 2)
+        plt.imshow((img[:, :, 1].astype(np.uint8)), cmap="gray")
+        plt.subplot(1, 4, 3)
+        plt.imshow((img[:, :, 2].astype(np.uint8)), cmap="gray")
+        plt.subplot(1, 4, 4)
+        plt.imshow(img1)
         plt.show()
-
+        self.binarisation(img)
         return img
 
     def passageAuCubeDigitalComplet(self):
@@ -340,16 +347,23 @@ class ColorSpace:
             img[i, 2] = b1
         img = np.reshape(img, (self.l, self.c, 3))
         self.img_norm = np.reshape(self.img_norm, (self.l, self.c, 3))
+        img1 = np.zeros((self.l, self.c, 3))
+        img1[:, :, 0] = img[:, :, 0]
+        img1[:, :, 1] = img[:, :, 1]
+        img1[:, :, 2] = img[:, :, 2]
         print "-----------SUCCESS--Cube-DigitalComplet-------------"
         img = self.normalise2(img)
         plt.subplot(1,3,1)
-        plt.imshow(cv2.equalizeHist(img[:,:,0].astype(np.uint8)),cmap="gray")
+        plt.imshow((img[:,:,0].astype(np.uint8)),cmap="gray")
         plt.subplot(1, 3, 2)
-        plt.imshow(cv2.equalizeHist(img[:, :, 1].astype(np.uint8)), cmap="gray")
+        plt.imshow((img[:, :, 1].astype(np.uint8)), cmap="gray")
         plt.subplot(1, 3, 3)
-        plt.imshow(cv2.equalizeHist(img[:, :, 2].astype(np.uint8)), cmap="gray")
-        plt.title("PassageAuCubeDigitalComplet")
+        plt.imshow((img[:, :, 2].astype(np.uint8)), cmap="gray")
+
+
+        #plt.title("PassageAuCubeDigitalComplet")
         plt.show()
+        self.binarisation(img)
 
 
         return img
@@ -468,18 +482,23 @@ class ColorSpace:
         hsl_conique[:,:,0] = self.hsl[:,:,0]
         hsl_conique[:, :, 2] = self.hsl[:, :, 2]
         img=self.normalise2(hsl_conique)
-        print "-------------norm-Max-Min-----Done--------"
-        plt.title("Hue")
-        plt.subplot(1, 3, 1)
-        plt.imshow(cv2.equalizeHist(img[:, :, 0].astype(np.uint8)), cmap="gray")
-        plt.title("Saturation")
-        plt.subplot(1, 3, 2)
-        plt.imshow(cv2.equalizeHist(img[:, :, 1].astype(np.uint8)), cmap="gray")
-        plt.title("Luminance")
-        plt.subplot(1, 3, 3)
-        plt.imshow(cv2.equalizeHist(img[:, :, 2].astype(np.uint8)), cmap="gray")
 
+
+        print "-------------norm-Max-Min-----Done--------"
+
+        plt.subplot(1, 3, 1)
+        plt.title("Hue")
+        plt.imshow((img[:, :, 0].astype(np.uint8)), cmap="gray")
+
+        plt.subplot(1, 3, 2)
+        plt.title("Saturation")
+        plt.imshow((img[:, :, 1].astype(np.uint8)), cmap="gray")
+
+        plt.subplot(1, 3, 3)
+        plt.title("Luminance")
+        plt.imshow((img[:, :, 2].astype(np.uint8)), cmap="gray")
         plt.show()
+        self.binarisation(img)
 
         return hsl_conique
 
@@ -520,20 +539,53 @@ class ColorSpace:
         print "--------------normalise succeed-----------------"
 
         return imgg
+    def binarisation(self,imgReconstruite):
+
+        # Otsu's thresholding after Gaussian filtering
+        # il faut lui donner image self.imgReconstruite et binariser chaque canal hue saturation et density
+
+        blur1 = cv2.GaussianBlur((imgReconstruite[:, :, 0]*255).astype(np.uint8), (5, 5), 0)
+        ret1, th1 = cv2.threshold(blur1, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+
+        blur2 = cv2.GaussianBlur((imgReconstruite[:, :, 1]*255).astype(np.uint8), (5, 5), 0)
+        ret2, th2 = cv2.threshold(blur2, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        blur3 = cv2.GaussianBlur((imgReconstruite[:, :, 2]*255).astype(np.uint8), (5, 5), 0)
+        ret3, th3 = cv2.threshold(blur3, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        plt.subplot(1,3,1)
+        plt.title("hue")
+        plt.imshow(th1,cmap="gray")
+        plt.subplot(1, 3, 2)
+        plt.title("Saturation")
+        plt.imshow(th2,cmap="gray")
+        plt.subplot(1, 3, 3)
+        plt.title("")
+        plt.imshow(th3,cmap="gray")
+
+        plt.show()
+        return th3
+
 
 if __name__ == '__main__':
+    x=input("tell me")
+    if x==1:
+        path1 = "C:/Users/ismet/Desktop/Final/Color-Deconvolution/Resultat/arn1.tif/HSD/HSI_Density.tif"
+        path2 = "C:/Users/ismet/Desktop/Final/Color-Deconvolution/Resultat/arn1.tif/HSD/HSI_Saturation.tif"
+        path3 = "C:/Users/ismet/Desktop/Final/Color-Deconvolution/Resultat/arn1.tif/HSD/HSI_Teinte.tif"
 
-    path1 = "C:/Users/ismet/Desktop/Final/Color-Deconvolution/Resultat/arn1.tif/HSD/HSI_Density.tif"
-    path2 = "C:/Users/ismet/Desktop/Final/Color-Deconvolution/Resultat/arn1.tif/HSD/HSI_Saturation.tif"
-    path3 = "C:/Users/ismet/Desktop/Final/Color-Deconvolution/Resultat/arn1.tif/HSD/HSI_Teinte.tif"
-
-    img1 = plt.imread(path1)
-    img2 = plt.imread(path2)
-    img3 = plt.imread(path3)
-    img = np.zeros([img1.shape[0], img1.shape[1], 3])
-    img[:, :, 0] = img3[:, :]
-    img[:, :, 1] = img2[:, :]
-    img[:, :, 2] = img1[:, :]
+        img1 = plt.imread(path1)
+        img2 = plt.imread(path2)
+        img3 = plt.imread(path3)
+        img = np.zeros([img1.shape[0], img1.shape[1], 3])
+        img[:, :, 0] = img3[:, :]
+        img[:, :, 1] = img2[:, :]
+        img[:, :, 2] = img1[:, :]
+    else:
+        path1="C:/Users/ismet/Desktop/Final/Color-Deconvolution/DataSet/BreastCancerCell_dataset/ytma10_010704_malignant3_ccd.tif"
+        #path1="C:/Users/ismet/Desktop/Final/Color-Deconvolution/Resultat/tumor.png/tumor.png"
+        img = plt.imread(path1)
 
     color=ColorSpace(img)
     color.normalise()
