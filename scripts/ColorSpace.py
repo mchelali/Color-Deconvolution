@@ -571,9 +571,9 @@ class ColorSpace:
 if __name__ == '__main__':
     x=input("tell me")
     if x==1:
-        path1 = "C:/Users/ismet/Desktop/Final/Color-Deconvolution/Resultat/arn1.tif/HSD/HSI_Density.tif"
-        path2 = "C:/Users/ismet/Desktop/Final/Color-Deconvolution/Resultat/arn1.tif/HSD/HSI_Saturation.tif"
-        path3 = "C:/Users/ismet/Desktop/Final/Color-Deconvolution/Resultat/arn1.tif/HSD/HSI_Teinte.tif"
+        path1 = "../Resultat/arn1.tif/HSD/HSI_Density.tif"
+        path2 = "../Resultat/arn1.tif/HSD/HSI_Saturation.tif"
+        path3 = "../Resultat/arn1.tif/HSD/HSI_Teinte.tif"
 
         img1 = plt.imread(path1)
         img2 = plt.imread(path2)
@@ -583,7 +583,7 @@ if __name__ == '__main__':
         img[:, :, 1] = img2[:, :]
         img[:, :, 2] = img1[:, :]
     else:
-        path1="C:/Users/ismet/Desktop/Final/Color-Deconvolution/DataSet/BreastCancerCell_dataset/ytma10_010704_malignant3_ccd.tif"
+        path1="../DataSet/BreastCancerCell_dataset/ytma10_010704_malignant3_ccd.tif"
         #path1="C:/Users/ismet/Desktop/Final/Color-Deconvolution/Resultat/tumor.png/tumor.png"
         img = plt.imread(path1)
 
