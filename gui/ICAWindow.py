@@ -10,9 +10,10 @@ from scripts import pca as Stain
 import numpy as np
 
 class ICAWindow(QtGui.QDialog):
-    def __init__(self):
+    def __init__(self, name):
         QtGui.QDialog.__init__(self)
         self.img = []
+        self.name = name
         self .initUi()
 
     def initUi(self):
@@ -62,6 +63,6 @@ class ICAWindow(QtGui.QDialog):
     def save_result(self):
         path = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory"))
         for i in range(len(self.img)):
-            cv2.imwrite(path + "/pca1_"+str(i)+".png", self.img[i][:, :, 0])
-            cv2.imwrite(path + "/pca2_"+str(i)+".png", self.img[i][:, :, 1])
-            cv2.imwrite(path + "/pca3_"+str(i)+".png", self.img[i][:, :, 2])
+            cv2.imwrite(path + "/R_"+self.name+str(i)+".png", self.img[i][:, :, 0])
+            cv2.imwrite(path + "/G_"+self.name+str(i)+".png", self.img[i][:, :, 1])
+            cv2.imwrite(path + "/B_"+self.name+str(i)+".png", self.img[i][:, :, 2])

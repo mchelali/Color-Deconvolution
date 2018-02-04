@@ -27,7 +27,7 @@ class ICA_StainSeparation:
         # Application de la PCA
         pca = PCA(n_components=3)
         self.pca_ = pca.fit_transform(self.od)
-        self.I_r =  np.dot(self.od.T, self.pca_)
+        #self.I_r =  np.dot(self.od.T, self.pca_)
 
 
     def lanchICA(self):
@@ -35,10 +35,10 @@ class ICA_StainSeparation:
         ica = FastICA(n_components=3, algorithm='parallel', whiten=True, fun='logcosh', max_iter=100,
                       tol=0.0001, w_init=None,random_state=2)
         self.ica_ = ica.fit_transform(self.pca_)
-        self.P = np.dot(self.I_r, self.ica_.T)
-        self.W = np.dot(self.pca_.T, self.P.T)
+        #self.P = np.dot(self.I_r, self.ica_.T)
+        #self.W = np.dot(self.pca_.T, self.P.T)
 
-
+    """ Cette methode ne marche pas , parce que elle n'est pas bien expliquer dans l'article
     def correctVectorICA(self, stain_number=3):
         # Initialisation du vecteur V_min ???
         v_min = np.zeros(self.ica_.shape)
@@ -65,15 +65,13 @@ class ICA_StainSeparation:
                 else:
                     d[i] = max(d[i]/10, d_min)
         return v_min
-
     def getCost(self, Vmin):
         v_min = np.zeros(self.ica_.shape)
         list_d = []
         for i in range(3):
             list_d.append( np.linalg.norm(self.P[:, i]) + ( np.dot(Vmin, self.P[:,i].T)**2 / np.linalg.norm(Vmin)**2) )
 
-
-
+    """
     def normalisation2(self, mat):
         mat = 255.0 * (mat - mat.min()) / (mat.max() - mat.min())
         return mat

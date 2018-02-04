@@ -168,6 +168,12 @@ class MainWindow(QtGui.QMainWindow):
         self.binICA = QtGui.QAction("binarize ica", self,
                                         triggered=self.ica_binarization)
 
+        self.ruifrok = QtGui.QAction("Methode Ruifrok", self,
+                                        triggered=self.ruifrokStainSeparation)
+
+        self.nmf = QtGui.QAction("NMF", self,
+                                        triggered=self.nmf_methode)
+
     def createMenus(self):
         """
         Organisation des actions dans des menus
@@ -179,6 +185,10 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.exitAct)
 
         self.meth = QtGui.QMenu("&Methode", self)
+        self.meth.addAction(self.ruifrok)
+        self.meth.addSeparator()
+        self.meth.addAction(self.nmf)
+        self.meth.addSeparator()
         self.meth.addAction(self.pca)
         self.meth.addAction(self.binPca)
         self.meth.addSeparator()
@@ -200,7 +210,8 @@ class MainWindow(QtGui.QMainWindow):
         self.menuBar().addMenu(self.meth)
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
-        print "binarization ica"
+
+
     def updateActions(self):
         self.zoomInAct.setEnabled(not self.fitToWindowAct.isChecked())
         self.zoomOutAct.setEnabled(not self.fitToWindowAct.isChecked())
@@ -220,12 +231,24 @@ class MainWindow(QtGui.QMainWindow):
         scrollBar.setValue(int(factor * scrollBar.value()
                                + ((factor - 1) * scrollBar.pageStep() / 2)))
 
+
+    def ruifrokStainSeparation(self):
+        from scripts import ColorDeconvolution as cd
+        # deconvolution de couleur
+        satin = cd.ColorDeconvolution(self.image, "")
+        satin.RGB_2_OD()
+        image = satin.separateStain()
+        self.cd_view = methodes.ICAWindow("ruifrock_")
+        self.cd_view.addImage(image)
+        self.cd_view.show_()
+        self.cd_view.show()
+
     def pca_methode(self):
         print "pca work"
         self.stain.RGB_2_OD()
         self.stain.lanchePCA()
         self.img_pca = self.stain.normalisation2(self.stain.pca_).reshape((self.l, self.c, 3))
-        self.pca_view = methodes.ICAWindow()
+        self.pca_view = methodes.ICAWindow("pca_")
         self.pca_view.addImage(self.img_pca)
         self.pca_view.show_()
         self.pca_view.show()
@@ -234,7 +257,7 @@ class MainWindow(QtGui.QMainWindow):
         print "ica work"
         self.stain.lanchICA()
         self.img_ica = self.stain.normalisation2(self.stain.ica_).reshape((self.l, self.c, 3))
-        self.ica_view = methodes.ICAWindow()
+        self.ica_view = methodes.ICAWindow("ica_")
         self.ica_view.addImage(self.img_ica)
         self.ica_view.show_()
         self.ica_view.show()
@@ -267,6 +290,15 @@ class MainWindow(QtGui.QMainWindow):
         self.ica_view.show_()
         self.ica_view.show()
 
+    def nmf_methode(self):
+        from scripts import nmf
+        nmf = nmf.NMF_StainSeparation(self.image)
+        nmf.lanchNMF()
+        resultat = nmf.nmf_.reshape((self.l, self.c, 3))
+        self.nmf_view = methodes.ICAWindow("nmf_")
+        self.nmf_view.addImage(resultat)
+        self.nmf_view.show_()
+        self.nmf_view.show()
 
 
 def main():
