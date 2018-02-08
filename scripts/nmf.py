@@ -7,7 +7,12 @@ import cv2
 class NMF_StainSeparation:
     def __init__(self, img):
         """
-        :param img: image d'une lame couleur RGB
+        :param  img: image d'une lame couleur RGB mais chaque canal est représenté dans une colone
+                od: c'est l'image en dencité optique
+                nmf_ : resultat de la decomposition
+        :methode
+                RGB2OD : transforme l'image en entrer en dencité optique
+                lanchNMF : applique la decomposition NMF
         """
         # construction d'une matrice ou chaque colone represente un canal
         self.size = img.shape
@@ -28,25 +33,27 @@ class NMF_StainSeparation:
         model = NMF(n_components=3, init='random', random_state=0)
         self.nmf_ = model.fit_transform(self.img)
 
+"""
+Le main dans ce fichier sert a faire le test avant de l'implémenter dans l'interface
 
+
+"""
 if __name__ == "__main__":
+    # charger une image
     img_path ="../DataSet/BreastCancerCell_dataset/ytma10_010704_benign1_ccd.tif"
-    img_path = "../DataSet_Lomenie/arn2.tif"
-    #img_path = "../DataSet_Lomenie/Lung_4stain.tif"
-    #img_path = "../Stain/Lung_4stain02.tif"
-    #img_path = "../he.png"
-
     img = plt.imread(img_path)
-    img = img[:, :, 0:3]
+
+    img = img[:, :, 0:3]# Dans cette lligne je prend que les 3 canneaux et ne pas prendre le canal Alpha sur des images au format PNG
     l, c, d = img.shape
     #img = cv2.resize(img, (c/3, l/3))
     print img.shape
 
-    nmf = NMF_StainSeparation(img)
-    nmf.lanchNMF()
+    nmf = NMF_StainSeparation(img) # Initialisation de la class n passant en parametre un image
+    nmf.lanchNMF() # lancer la decomposition NMF
 
-    resultat = nmf.nmf_.reshape((l, c, 3))
-
+    resultat = nmf.nmf_.reshape((l, c, 3)) # le resultat obtenue n'est pas dans la meme taille en entrer
+                                           # la chaque canal est representé dans une colone
+                                           # je re-taille en taille initial pour pouvoire visualisé
     print resultat.shape
 
     plt.subplot(1, 4, 1)

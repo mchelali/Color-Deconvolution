@@ -7,7 +7,11 @@ import cv2
 class ICA_StainSeparation:
     def __init__(self, img):
         """
-        :param img: image d'une lame couleur RGB
+        :param  img: image d'une lame couleur RGB, Chaque colone represente un canal [NxM, 3]
+                size: taile de l'image en entrer
+                od : image en densité optique
+                pca_: resultat de la PCA (vecteurs propres)
+                ica_: résultat de la ICA (Source séparer)
         """
         # construction d'une matrice ou chaque colone represente un canal
         self.size = img.shape
@@ -17,6 +21,9 @@ class ICA_StainSeparation:
         self.ica_ = None # Matrice reduite de ICA
 
     def RGB_2_OD(self):
+        """
+            transformation de l'image en entrer en densité optique
+        """
         self.od = np.zeros([self.size[0]*self.size[1], self.size[2]])
         for i in range(self.size[0]*self.size[1]):
             for j in range(self.size[2]):
@@ -24,21 +31,26 @@ class ICA_StainSeparation:
                     self.od[i, j] = np.log10(self.img[i, j])
 
     def lanchePCA(self):
-        # Application de la PCA
+        """
+            Application de la PCA
+        """
         pca = PCA(n_components=3)
         self.pca_ = pca.fit_transform(self.od)
         #self.I_r =  np.dot(self.od.T, self.pca_)
 
 
     def lanchICA(self):
-        # Application de ICA
+        """
+            Application de la ICA
+        """
         ica = FastICA(n_components=3, algorithm='parallel', whiten=True, fun='logcosh', max_iter=100,
                       tol=0.0001, w_init=None,random_state=2)
         self.ica_ = ica.fit_transform(self.pca_)
         #self.P = np.dot(self.I_r, self.ica_.T)
         #self.W = np.dot(self.pca_.T, self.P.T)
 
-    """ Cette methode ne marche pas , parce que elle n'est pas bien expliquer dans l'article
+    # Cette methode ne marche pas , parce que elle n'est pas bien expliquer dans l'article
+    """
     def correctVectorICA(self, stain_number=3):
         # Initialisation du vecteur V_min ???
         v_min = np.zeros(self.ica_.shape)
@@ -73,10 +85,18 @@ class ICA_StainSeparation:
 
     """
     def normalisation2(self, mat):
+        """
+        Ici on normalize les valeur entre 0 et 255 pour pouvoir visualiser les image et aussi les enregister
+        """
         mat = 255.0 * (mat - mat.min()) / (mat.max() - mat.min())
         return mat
 
-    # ---------------------------------------------Test---------------------------------------------------#
+    # ---------------------------------------------Implémentation PCA---------------------------------------------------#
+    """
+        Implementation de l'algorothme de pca.
+        On a pas utilisé ce code pacequ'il n'est pas optimal
+        les image de grande taille ne passe pas cause de problem de memoire
+    """
     def transformData(self, img):                                                                 #-------#
         l, c, d = img.shape                                                                       #-------#
         data = []                                                                                 #-------#
@@ -174,7 +194,7 @@ if __name__ == "__main__":
     stain.RGB_2_OD()
     stain.lanchePCA()
     stain.lanchICA()
-    stain.correctVectorICA(3)
+    #stain.correctVectorICA(3)
     # Resahepe et visalisation des resultats
     img_pca = stain.normalisation2(stain.pca_).reshape((l, c, 3))
     img_ica = stain.normalisation2(stain.ica_).reshape((l, c, 3))
@@ -263,7 +283,9 @@ if __name__ == "__main__":
 
     plt.show()
 
-    # ce code permet de sauvegarder les images des méthodes, il faut juste donner le chemin
+    """
+        Ce code permet de sauvegarder les images des méthodes, il faut juste donner le chemin de sauvegarde dans la variable path
+    """
     import cv2
     path="/home/ro0t34/Pictures/"
 
@@ -276,8 +298,3 @@ if __name__ == "__main__":
     cv2.imwrite(path + "ica1.png", img_ica[:, :, 0])
     cv2.imwrite(path + "ica2.png", img_ica[:, :, 1])
     cv2.imwrite(path + "ica3.png", img_ica[:, :, 2])
-
-    import Image
-    img1 = Image.fromarray(img_ica[:, :, 0])
-    print img1
-    img1.save(path + "image.tiff")

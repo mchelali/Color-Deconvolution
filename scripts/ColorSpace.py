@@ -8,9 +8,10 @@ import cv2
 
 class ColorSpace:
     def __init__(self,img):
-        self.img_0=img
-        self.l=self.img_0.shape[0]
-        self.c=self.img_0.shape[1]
+        self.img_0=img # image en entrer
+        self.l=self.img_0.shape[0] # nombre de ligne de l'image
+        self.c=self.img_0.shape[1] # nombre de colone de l'image
+        #Initialisation de differentes matrices pour diffrents espace de representation
         self.img_norm=np.zeros((self.l,self.c,3))
         self.hsv=np.zeros((self.l,self.c,3))
         self.hsl=np.zeros((self.l,self.c,3))
@@ -26,15 +27,12 @@ class ColorSpace:
         max_g=np.amax(g)
         max_b=np.amax(b)
 
-
-
-
         self.img_norm[:, :, 0] = self.img_0[:, :, 0] / max_r
         self.img_norm[:, :, 1] = self.img_0[:, :, 1] / max_g
         self.img_norm[:, :, 2] = self.img_0[:, :, 2] / max_b
 
-
         return self.img_norm
+
     #s,v entre 0 et 1 h entre -1 et 5 (je pense qu'il faut normaliser entre 0 et klk chose)
     def HSV(self):
         r=self.img_norm[:,:,0]
